@@ -6,7 +6,8 @@
 /// @mainpage
 /// # Jack's Awesome Containers!
 ///
-/// `jac` is a header-only C++20 library of various generally useful and niche container data strcutures.
+/// `jac` is a header-only C++20 library of various generally useful
+/// and niche container data strcutures.
 ///
 /// ## Smart Pointers (Single Object Containers)
 ///  Type | Brief  
