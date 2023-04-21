@@ -1,0 +1,5 @@
+build/
+.cache/
+*.swp
+*.swo
+compile_commands.json
