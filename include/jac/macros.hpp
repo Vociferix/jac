@@ -12,16 +12,17 @@
 /// ## Smart Pointers (Single Object Containers)
 ///  Type | Brief
 /// ------|-------
-///  @ref jac::holder "holder<T, Tag=void>" | @copybrief jac::holder
-///  @ref jac::option "option<T>" | @copybrief jac::option
-///  @ref jac::result "result<T, E>" | @copybrief jac::result
+/// @ref jac::holder "holder<T, Tag=void>" | @copybrief jac::holder
+/// @ref jac::maybe_uninit "maybe_uninit<T>" | @copybrief jac::maybe_uninit
+/// @ref jac::option "option<T>" | @copybrief jac::option
+/// @ref jac::result "result<T, E>" | @copybrief jac::result
 ///
 /// ## Utility Types
 ///  Type | Brief
 /// ------|-------
-///  @ref jac::null_t "null_t" | @copybrief jac::null_t
-///  @ref jac::void_t "void_t" | @copybrief jac::void_t
-///  @ref jac::error "error" | @copybrief jac::error
+/// @ref jac::null_t "null_t" | @copybrief jac::null_t
+/// @ref jac::void_t "void_t" | @copybrief jac::void_t
+/// @ref jac::error "error" | @copybrief jac::error
 ///
 /// ## Constants
 ///  Constant | Brief
