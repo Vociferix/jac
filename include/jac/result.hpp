@@ -15,7 +15,7 @@
 
 namespace jac {
 
-enum class error_tag { };
+enum class error_tag {};
 
 /// @brief Representation of an error value
 template <typename E>
@@ -31,7 +31,7 @@ constexpr error<E> make_error(std::initializer_list<U> ilist, Args&&... args) {
     return error<E>(std::in_place, ilist, std::forward<Args>(args)...);
 }
 
-struct in_place_error_t { };
+struct in_place_error_t {};
 
 static inline constexpr in_place_error_t in_place_error{};
 
@@ -71,7 +71,8 @@ class result {
     using error_reference = typename holder<E>::reference;
     using error_const_reference = typename holder<E>::const_reference;
     using error_rvalue_reference = typename holder<E>::rvalue_reference;
-    using error_const_rvalue_reference = typename holder<E>::const_rvalue_reference;
+    using error_const_rvalue_reference =
+        typename holder<E>::const_rvalue_reference;
     using error_pointer = typename holder<E>::pointer;
     using error_const_pointer = typename holder<E>::const_pointer;
 
@@ -82,36 +83,57 @@ class result {
     constexpr result(result&&) = default;
 
     template <typename... Args>
-    constexpr explicit(sizeof...(Args) == 0) result(std::in_place_t in_place, Args&&... args)
-        : value_(std::in_place_index<0>, in_place, std::forward<Args>(args)...) {}
+    constexpr explicit(sizeof...(Args) == 0)
+        result(std::in_place_t in_place, Args&&... args)
+        : value_(std::in_place_index<0>,
+                 in_place,
+                 std::forward<Args>(args)...) {}
 
     template <typename U, typename... Args>
-    constexpr result(std::in_place_t in_place, std::initializer_list<U> ilist, Args&&... args)
-        : value_(std::in_place_index<0>, in_place, ilist, std::forward<Args>(args)...) {}
+    constexpr result(std::in_place_t in_place,
+                     std::initializer_list<U> ilist,
+                     Args&&... args)
+        : value_(std::in_place_index<0>,
+                 in_place,
+                 ilist,
+                 std::forward<Args>(args)...) {}
 
     template <typename... Args>
-    constexpr explicit(sizeof...(Args) == 0) result([[maybe_unused]] in_place_error_t in_place, Args&&... args)
-        : value_(std::in_place_index<1>, std::in_place, std::forward<Args>(args)...) {}
+    constexpr explicit(sizeof...(Args) == 0)
+        result([[maybe_unused]] in_place_error_t in_place, Args&&... args)
+        : value_(std::in_place_index<1>,
+                 std::in_place,
+                 std::forward<Args>(args)...) {}
 
     template <typename U, typename... Args>
-    constexpr result([[maybe_unused]] in_place_error_t in_place, std::initializer_list<U> ilist, Args&&... args)
-        : value_(std::in_place_index<1>, std::in_place, ilist, std::forward<Args>(args)...) {}
+    constexpr result([[maybe_unused]] in_place_error_t in_place,
+                     std::initializer_list<U> ilist,
+                     Args&&... args)
+        : value_(std::in_place_index<1>,
+                 std::in_place,
+                 ilist,
+                 std::forward<Args>(args)...) {}
 
     template <typename U, typename V>
         requires(
-            std::is_constructible_v<value_type, typename result<U, V>::const_reference> &&
-            std::is_constructible_v<error_type, typename result<U, V>::error_const_reference> &&
+            std::is_constructible_v<value_type,
+                                    typename result<U, V>::const_reference> &&
+            std::is_constructible_v<
+                error_type,
+                typename result<U, V>::error_const_reference> &&
             !std::is_constructible_v<value_type, result<U, V>&> &&
             !std::is_constructible_v<value_type, const result<U, V>&> &&
-            !std::is_constructible_v<value_type, result<U, V>&&> &&
-            !std::is_constructible_v<value_type, const result<U, V>&&> &&
+            !std::is_constructible_v<value_type, result<U, V> &&> &&
+            !std::is_constructible_v<value_type, const result<U, V> &&> &&
             !std::is_convertible_v<result<U, V>&, value_type> &&
             !std::is_convertible_v<const result<U, V>&, value_type> &&
-            !std::is_convertible_v<result<U, V>&&, value_type> &&
-            !std::is_convertible_v<const result<U, V>&&, value_type>
-        )
-    constexpr explicit(!std::is_convertible_v<typename result<U, V>::const_reference, value_type> || !std::is_convertible_v<typename result<U, V>::error_const_reference, error_type>)
-    result(const result<U, V>& other)
+            !std::is_convertible_v<result<U, V> &&, value_type> &&
+            !std::is_convertible_v<const result<U, V> &&, value_type>)
+    constexpr explicit(
+        !std::is_convertible_v<typename result<U, V>::const_reference,
+                               value_type> ||
+        !std::is_convertible_v<typename result<U, V>::error_const_reference,
+                               error_type>) result(const result<U, V>& other)
         : value_(std::in_place_index<2>) {
         if (other.has_value()) {
             value_.template emplace<0>(std::in_place, *other);
@@ -122,19 +144,24 @@ class result {
 
     template <typename U, typename V>
         requires(
-            std::is_constructible_v<value_type, typename result<U, V>::rvalue_reference> &&
-            std::is_constructible_v<error_type, typename result<U, V>::error_rvalue_reference> &&
+            std::is_constructible_v<value_type,
+                                    typename result<U, V>::rvalue_reference> &&
+            std::is_constructible_v<
+                error_type,
+                typename result<U, V>::error_rvalue_reference> &&
             !std::is_constructible_v<value_type, result<U, V>&> &&
             !std::is_constructible_v<value_type, const result<U, V>&> &&
-            !std::is_constructible_v<value_type, result<U, V>&&> &&
-            !std::is_constructible_v<value_type, const result<U, V>&&> &&
+            !std::is_constructible_v<value_type, result<U, V> &&> &&
+            !std::is_constructible_v<value_type, const result<U, V> &&> &&
             !std::is_convertible_v<result<U, V>&, value_type> &&
             !std::is_convertible_v<const result<U, V>&, value_type> &&
-            !std::is_convertible_v<result<U, V>&&, value_type> &&
-            !std::is_convertible_v<const result<U, V>&&, value_type>
-        )
-    constexpr explicit(!std::is_convertible_v<typename result<U, V>::rvalue_reference, value_type> || !std::is_convertible_v<typename result<U, V>::error_rvalue_reference, error_type>)
-    result(result<U, V>&& other)
+            !std::is_convertible_v<result<U, V> &&, value_type> &&
+            !std::is_convertible_v<const result<U, V> &&, value_type>)
+    constexpr explicit(
+        !std::is_convertible_v<typename result<U, V>::rvalue_reference,
+                               value_type> ||
+        !std::is_convertible_v<typename result<U, V>::error_rvalue_reference,
+                               error_type>) result(result<U, V>&& other)
         : value_(std::in_place_index<2>) {
         if (other.has_value()) {
             value_.template emplace<0>(std::in_place, *std::move(other));
@@ -144,46 +171,47 @@ class result {
     }
 
     template <typename U = T>
-        requires(
-            std::is_constructible_v<value_type, U&&> &&
-            !std::is_same_v<std::remove_cvref_t<U>, std::in_place_t> &&
-            !std::is_same_v<std::remove_cvref_t<U>, in_place_error_t> &&
-            !std::is_same_v<std::remove_cvref_t<U>, result<T, E>> &&
-            !std::is_same_v<std::remove_cvref_t<U>, error<E>>
-        )
-    constexpr explicit(!std::is_convertible_v<U&&, value_type>) result(U&& value)
-        : value_(std::in_place_index<0>, std::in_place, std::forward<U>(value)) {}
+        requires(std::is_constructible_v<value_type, U &&> &&
+                 !std::is_same_v<std::remove_cvref_t<U>, std::in_place_t> &&
+                 !std::is_same_v<std::remove_cvref_t<U>, in_place_error_t> &&
+                 !std::is_same_v<std::remove_cvref_t<U>, result<T, E>> &&
+                 !std::is_same_v<std::remove_cvref_t<U>, error<E>>)
+    constexpr explicit(!std::is_convertible_v<U&&, value_type>)
+        result(U&& value)
+        : value_(std::in_place_index<0>,
+                 std::in_place,
+                 std::forward<U>(value)) {}
 
     template <typename V = E>
-        requires(
-            std::is_constructible_v<error_type, typename error<V>::const_reference> &&
-            !std::is_constructible_v<value_type, error<V>&> &&
-            !std::is_constructible_v<value_type, const error<V>&> &&
-            !std::is_constructible_v<value_type, error<V>&&> &&
-            !std::is_constructible_v<value_type, const error<V>&&> &&
-            !std::is_convertible_v<error<V>&, value_type> &&
-            !std::is_convertible_v<const error<V>&, value_type> &&
-            !std::is_convertible_v<error<V>&&, value_type> &&
-            !std::is_convertible_v<const error<V>&&, value_type>
-        )
-    constexpr explicit(!std::is_convertible_v<typename error<V>::const_reference, error_type>)
-    result(const error<V>& err)
+        requires(std::is_constructible_v<error_type,
+                                         typename error<V>::const_reference> &&
+                 !std::is_constructible_v<value_type, error<V>&> &&
+                 !std::is_constructible_v<value_type, const error<V>&> &&
+                 !std::is_constructible_v<value_type, error<V> &&> &&
+                 !std::is_constructible_v<value_type, const error<V> &&> &&
+                 !std::is_convertible_v<error<V>&, value_type> &&
+                 !std::is_convertible_v<const error<V>&, value_type> &&
+                 !std::is_convertible_v<error<V> &&, value_type> &&
+                 !std::is_convertible_v<const error<V> &&, value_type>)
+    constexpr explicit(
+        !std::is_convertible_v<typename error<V>::const_reference, error_type>)
+        result(const error<V>& err)
         : value_(std::in_place_index<1>, std::in_place, *err) {}
 
     template <typename V = E>
-        requires(
-            std::is_constructible_v<error_type, typename error<V>::rvalue_reference> &&
-            !std::is_constructible_v<value_type, error<V>&> &&
-            !std::is_constructible_v<value_type, const error<V>&> &&
-            !std::is_constructible_v<value_type, error<V>&&> &&
-            !std::is_constructible_v<value_type, const error<V>&&> &&
-            !std::is_convertible_v<error<V>&, value_type> &&
-            !std::is_convertible_v<const error<V>&, value_type> &&
-            !std::is_convertible_v<error<V>&&, value_type> &&
-            !std::is_convertible_v<const error<V>&&, value_type>
-        )
-    constexpr explicit(!std::is_convertible_v<typename error<V>::rvalue_reference, error_type>)
-    result(error<V>&& err)
+        requires(std::is_constructible_v<error_type,
+                                         typename error<V>::rvalue_reference> &&
+                 !std::is_constructible_v<value_type, error<V>&> &&
+                 !std::is_constructible_v<value_type, const error<V>&> &&
+                 !std::is_constructible_v<value_type, error<V> &&> &&
+                 !std::is_constructible_v<value_type, const error<V> &&> &&
+                 !std::is_convertible_v<error<V>&, value_type> &&
+                 !std::is_convertible_v<const error<V>&, value_type> &&
+                 !std::is_convertible_v<error<V> &&, value_type> &&
+                 !std::is_convertible_v<const error<V> &&, value_type>)
+    constexpr explicit(
+        !std::is_convertible_v<typename error<V>::rvalue_reference, error_type>)
+        result(error<V>&& err)
         : value_(std::in_place_index<1>, std::in_place, *std::move(err)) {}
 
     constexpr ~result() = default;
@@ -193,12 +221,11 @@ class result {
     constexpr result& operator=(result&&) = default;
 
     template <typename U = value_type>
-        requires(
-            !std::is_same_v<std::remove_cvref_t<U>, result<T, E>> &&
-            std::is_constructible_v<value_type, U> &&
-            std::is_assignable_v<value_type, U> &&
-            (!std::is_same_v<std::decay_t<U>, value_type> || !std::is_scalar_v<value_type>)
-        )
+        requires(!std::is_same_v<std::remove_cvref_t<U>, result<T, E>> &&
+                 std::is_constructible_v<value_type, U> &&
+                 std::is_assignable_v<value_type, U> &&
+                 (!std::is_same_v<std::decay_t<U>, value_type> ||
+                  !std::is_scalar_v<value_type>))
     constexpr result& operator=(U&& value) {
         if (value_.index() == 0) {
             *std::get_if<0>(value_) = std::forward<U>(value);
@@ -209,22 +236,22 @@ class result {
     }
 
     template <typename V = E>
-        requires(
-            std::is_constructible_v<error_type, typename error<V>::const_referemce> &&
-            std::is_assignable_v<error_type, typename error<V>::const_reference> &&
-            !std::is_constructible_v<value_type, error<V>&> &&
-            !std::is_constructible_v<value_type, const error<V>&> &&
-            !std::is_constructible_v<value_type, error<V>&&> &&
-            !std::is_constructible_v<value_type, const error<V>&&> &&
-            !std::is_convertible_v<error<V>&, value_type> &&
-            !std::is_convertible_v<const error<V>&, value_type> &&
-            !std::is_convertible_v<error<V>&&, value_type> &&
-            !std::is_convertible_v<const error<V>&&, value_type> &&
-            !std::is_assignable_v<value_type, error<V>&> &&
-            !std::is_assignable_v<value_type, const error<V>&> &&
-            !std::is_assignable_v<value_type, error<V>&&> &&
-            !std::is_assignable_v<value_type, const error<V>&&>
-        )
+        requires(std::is_constructible_v<error_type,
+                                         typename error<V>::const_referemce> &&
+                 std::is_assignable_v<error_type,
+                                      typename error<V>::const_reference> &&
+                 !std::is_constructible_v<value_type, error<V>&> &&
+                 !std::is_constructible_v<value_type, const error<V>&> &&
+                 !std::is_constructible_v<value_type, error<V> &&> &&
+                 !std::is_constructible_v<value_type, const error<V> &&> &&
+                 !std::is_convertible_v<error<V>&, value_type> &&
+                 !std::is_convertible_v<const error<V>&, value_type> &&
+                 !std::is_convertible_v<error<V> &&, value_type> &&
+                 !std::is_convertible_v<const error<V> &&, value_type> &&
+                 !std::is_assignable_v<value_type, error<V>&> &&
+                 !std::is_assignable_v<value_type, const error<V>&> &&
+                 !std::is_assignable_v<value_type, error<V> &&> &&
+                 !std::is_assignable_v<value_type, const error<V> &&>)
     constexpr result& operator=(const error<V>& err) {
         if (value_.index() == 1) {
             *std::get_if<1>(value_) = *err;
@@ -235,22 +262,22 @@ class result {
     }
 
     template <typename V = E>
-        requires(
-            std::is_constructible_v<error_type, typename error<V>::rvalue_reference> &&
-            std::is_assignable_v<error_type, typename error<V>::rvalue_reference> &&
-            !std::is_constructible_v<value_type, error<V>&> &&
-            !std::is_constructible_v<value_type, const error<V>&> &&
-            !std::is_constructible_v<value_type, error<V>&&> &&
-            !std::is_constructible_v<value_type, const error<V>&&> &&
-            !std::is_convertible_v<error<V>&, value_type> &&
-            !std::is_convertible_v<const error<V>&, value_type> &&
-            !std::is_convertible_v<error<V>&&, value_type> &&
-            !std::is_convertible_v<const error<V>&&, value_type> &&
-            !std::is_assignable_v<value_type, error<V>&> &&
-            !std::is_assignable_v<value_type, const error<V>&> &&
-            !std::is_assignable_v<value_type, error<V>&&> &&
-            !std::is_assignable_v<value_type, const error<V>&&>
-        )
+        requires(std::is_constructible_v<error_type,
+                                         typename error<V>::rvalue_reference> &&
+                 std::is_assignable_v<error_type,
+                                      typename error<V>::rvalue_reference> &&
+                 !std::is_constructible_v<value_type, error<V>&> &&
+                 !std::is_constructible_v<value_type, const error<V>&> &&
+                 !std::is_constructible_v<value_type, error<V> &&> &&
+                 !std::is_constructible_v<value_type, const error<V> &&> &&
+                 !std::is_convertible_v<error<V>&, value_type> &&
+                 !std::is_convertible_v<const error<V>&, value_type> &&
+                 !std::is_convertible_v<error<V> &&, value_type> &&
+                 !std::is_convertible_v<const error<V> &&, value_type> &&
+                 !std::is_assignable_v<value_type, error<V>&> &&
+                 !std::is_assignable_v<value_type, const error<V>&> &&
+                 !std::is_assignable_v<value_type, error<V> &&> &&
+                 !std::is_assignable_v<value_type, const error<V> &&>)
     constexpr result& operator=(error<V>&& err) {
         if (value_.index() == 1) {
             *std::get_if<1>(value_) = *std::move(err);
@@ -261,20 +288,18 @@ class result {
     }
 
     template <typename U, typename V>
-        requires(
-            !std::is_constructible_v<value_type, result<U, V>&> &&
-            !std::is_constructible_v<value_type, const result<U, V>&> &&
-            !std::is_constructible_v<value_type, result<U, V>&&> &&
-            !std::is_constructible_v<value_type, const result<U, V>&&> &&
-            !std::is_convertible_v<result<U, V>&, value_type> &&
-            !std::is_convertible_v<const result<U, V>&, value_type> &&
-            !std::is_convertible_v<result<U, V>&&, value_type> &&
-            !std::is_convertible_v<const result<U, V>&&, value_type> &&
-            !std::is_assignable_v<value_type, result<U, V>&> &&
-            !std::is_assignable_v<value_type, const result<U, V>&> &&
-            !std::is_assignable_v<value_type, result<U, V>&&> &&
-            !std::is_assignable_v<value_type, const result<U, V>&&>
-        )
+        requires(!std::is_constructible_v<value_type, result<U, V>&> &&
+                 !std::is_constructible_v<value_type, const result<U, V>&> &&
+                 !std::is_constructible_v<value_type, result<U, V> &&> &&
+                 !std::is_constructible_v<value_type, const result<U, V> &&> &&
+                 !std::is_convertible_v<result<U, V>&, value_type> &&
+                 !std::is_convertible_v<const result<U, V>&, value_type> &&
+                 !std::is_convertible_v<result<U, V> &&, value_type> &&
+                 !std::is_convertible_v<const result<U, V> &&, value_type> &&
+                 !std::is_assignable_v<value_type, result<U, V>&> &&
+                 !std::is_assignable_v<value_type, const result<U, V>&> &&
+                 !std::is_assignable_v<value_type, result<U, V> &&> &&
+                 !std::is_assignable_v<value_type, const result<U, V> &&>)
     constexpr result& operator=(const result<U, V>& other) {
         if (other.has_value()) {
             if (value_.index() == 0) {
@@ -293,20 +318,18 @@ class result {
     }
 
     template <typename U, typename V>
-        requires(
-            !std::is_constructible_v<value_type, result<U, V>&> &&
-            !std::is_constructible_v<value_type, const result<U, V>&> &&
-            !std::is_constructible_v<value_type, result<U, V>&&> &&
-            !std::is_constructible_v<value_type, const result<U, V>&&> &&
-            !std::is_convertible_v<result<U, V>&, value_type> &&
-            !std::is_convertible_v<const result<U, V>&, value_type> &&
-            !std::is_convertible_v<result<U, V>&&, value_type> &&
-            !std::is_convertible_v<const result<U, V>&&, value_type> &&
-            !std::is_assignable_v<value_type, result<U, V>&> &&
-            !std::is_assignable_v<value_type, const result<U, V>&> &&
-            !std::is_assignable_v<value_type, result<U, V>&&> &&
-            !std::is_assignable_v<value_type, const result<U, V>&&>
-        )
+        requires(!std::is_constructible_v<value_type, result<U, V>&> &&
+                 !std::is_constructible_v<value_type, const result<U, V>&> &&
+                 !std::is_constructible_v<value_type, result<U, V> &&> &&
+                 !std::is_constructible_v<value_type, const result<U, V> &&> &&
+                 !std::is_convertible_v<result<U, V>&, value_type> &&
+                 !std::is_convertible_v<const result<U, V>&, value_type> &&
+                 !std::is_convertible_v<result<U, V> &&, value_type> &&
+                 !std::is_convertible_v<const result<U, V> &&, value_type> &&
+                 !std::is_assignable_v<value_type, result<U, V>&> &&
+                 !std::is_assignable_v<value_type, const result<U, V>&> &&
+                 !std::is_assignable_v<value_type, result<U, V> &&> &&
+                 !std::is_assignable_v<value_type, const result<U, V> &&>)
     constexpr result& operator=(result<U, V>&& other) {
         if (other.has_value()) {
             if (value_.index() == 0) {
@@ -318,49 +341,38 @@ class result {
             if (value_.index() == 1) {
                 *std::get_if<1>(value_) = std::move(other).error();
             } else {
-                value_.template emplace<1>(std::in_place, std::move(other).error());
+                value_.template emplace<1>(std::in_place,
+                                           std::move(other).error());
             }
         }
         return *this;
     }
 
-    constexpr bool has_value() const noexcept {
-        return value_.index() == 0;
-    }
+    constexpr bool has_value() const noexcept { return value_.index() == 0; }
 
-    constexpr operator bool() const noexcept {
-        return value_.index() == 0;
-    }
+    constexpr operator bool() const noexcept { return value_.index() == 0; }
 
     constexpr reference value() & {
         auto ptr = &*std::get_if<0>(value_);
-        if (ptr == nullptr) {
-            throw bad_result_access();
-        }
+        if (ptr == nullptr) { throw bad_result_access(); }
         return *ptr;
     }
 
     constexpr const_reference value() const& {
         auto ptr = &*std::get_if<0>(value_);
-        if (ptr == nullptr) {
-            throw bad_result_access();
-        }
+        if (ptr == nullptr) { throw bad_result_access(); }
         return *ptr;
     }
 
     constexpr rvalue_reference value() && {
         auto ptr = &*std::get_if<0>(value_);
-        if (ptr == nullptr) {
-            throw bad_result_access();
-        }
+        if (ptr == nullptr) { throw bad_result_access(); }
         return std::move(*ptr);
     }
 
     constexpr const_rvalue_reference value() const&& {
         auto ptr = &*std::get_if<0>(value_);
-        if (ptr == nullptr) {
-            throw bad_result_access();
-        }
+        if (ptr == nullptr) { throw bad_result_access(); }
         return std::move(*ptr);
     }
 
@@ -445,7 +457,8 @@ class result {
         if (has_value()) {
             return std::invoke(std::forward<F>(f), **this);
         } else {
-            return std::remove_cvref_t<std::invoke_result_t<F, reference>>(in_place_error, error());
+            return std::remove_cvref_t<std::invoke_result_t<F, reference>>(
+                in_place_error, error());
         }
     }
 
@@ -454,7 +467,9 @@ class result {
         if (has_value()) {
             return std::invoke(std::forward<F>(f), **this);
         } else {
-            return std::remove_cvref_t<std::invoke_result_t<F, const_reference>>(in_place_error, error());
+            return std::remove_cvref_t<
+                std::invoke_result_t<F, const_reference>>(in_place_error,
+                                                          error());
         }
     }
 
@@ -463,7 +478,9 @@ class result {
         if (has_value()) {
             return std::invoke(std::forward<F>(f), *std::move(*this));
         } else {
-            return std::remove_cvref_t<std::invoke_result_t<F, rvalue_reference>>(in_place_error, std::move(*this).error());
+            return std::remove_cvref_t<
+                std::invoke_result_t<F, rvalue_reference>>(
+                in_place_error, std::move(*this).error());
         }
     }
 
@@ -472,14 +489,17 @@ class result {
         if (has_value()) {
             return std::invoke(std::forward<F>(f), *std::move(*this));
         } else {
-            return std::remove_cvref_t<std::invoke_result_t<F, const_rvalue_reference>>(in_place_error, std::move(*this).error());
+            return std::remove_cvref_t<
+                std::invoke_result_t<F, const_rvalue_reference>>(
+                in_place_error, std::move(*this).error());
         }
     }
 
     template <typename F>
     constexpr auto or_else(F&& f) & {
         if (has_value()) {
-            return std::remove_cvref_t<std::invoke_result_t<F, error_reference>>(**this);
+            return std::remove_cvref_t<
+                std::invoke_result_t<F, error_reference>>(**this);
         } else {
             return std::invoke(std::forward<F>(f), error());
         }
@@ -488,7 +508,8 @@ class result {
     template <typename F>
     constexpr auto or_else(F&& f) const& {
         if (has_value()) {
-            return std::remove_cvref_t<std::invoke_result_t<F, error_const_reference>>(**this);
+            return std::remove_cvref_t<
+                std::invoke_result_t<F, error_const_reference>>(**this);
         } else {
             return std::invoke(std::forward<F>(f), error());
         }
@@ -497,7 +518,9 @@ class result {
     template <typename F>
     constexpr auto or_else(F&& f) && {
         if (has_value()) {
-            return std::remove_cvref_t<std::invoke_result_t<F, error_rvalue_reference>>(*std::move(*this));
+            return std::remove_cvref_t<
+                std::invoke_result_t<F, error_rvalue_reference>>(
+                *std::move(*this));
         } else {
             return std::invoke(std::forward<F>(f), std::move(*this).error());
         }
@@ -506,7 +529,9 @@ class result {
     template <typename F>
     constexpr auto or_else(F&& f) const&& {
         if (has_value()) {
-            return std::remove_cvref_t<std::invoke_result_t<F, error_const_rvalue_reference>>(*std::move(*this));
+            return std::remove_cvref_t<
+                std::invoke_result_t<F, error_const_rvalue_reference>>(
+                *std::move(*this));
         } else {
             return std::invoke(std::forward<F>(f), std::move(*this).error());
         }
@@ -536,7 +561,8 @@ class result {
     constexpr auto transform(F&& f) && {
         using ret_t = std::invoke_result_t<F, rvalue_reference>;
         if (has_value()) {
-            return result<ret_t, E>(std::invoke(std::forward<F>(f), *std::move(*this)));
+            return result<ret_t, E>(
+                std::invoke(std::forward<F>(f), *std::move(*this)));
         } else {
             return result<ret_t, E>(in_place_error, std::move(*this).error());
         }
@@ -546,7 +572,8 @@ class result {
     constexpr auto transform(F&& f) const&& {
         using ret_t = std::invoke_result_t<F, const_rvalue_reference>;
         if (has_value()) {
-            return result<ret_t, E>(std::invoke(std::forward<F>(f), *std::move(*this)));
+            return result<ret_t, E>(
+                std::invoke(std::forward<F>(f), *std::move(*this)));
         } else {
             return result<ret_t, E>(in_place_error, std::move(*this).error());
         }
@@ -558,7 +585,8 @@ class result {
         if (has_value()) {
             return result<T, ret_t>(**this);
         } else {
-            return result<T, ret_t>(in_place_error, std::invoke(std::forward<F>(f), error()));
+            return result<T, ret_t>(in_place_error,
+                                    std::invoke(std::forward<F>(f), error()));
         }
     }
 
@@ -568,7 +596,8 @@ class result {
         if (has_value()) {
             return result<T, ret_t>(**this);
         } else {
-            return result<T, ret_t>(in_place_error, std::invoke(std::forward<F>(f), error()));
+            return result<T, ret_t>(in_place_error,
+                                    std::invoke(std::forward<F>(f), error()));
         }
     }
 
@@ -578,7 +607,9 @@ class result {
         if (has_value()) {
             return result<T, ret_t>(*std::move(*this));
         } else {
-            return result<T, ret_t>(in_place_error, std::invoke(std::forward<F>(f), std::move(*this).error()));
+            return result<T, ret_t>(
+                in_place_error,
+                std::invoke(std::forward<F>(f), std::move(*this).error()));
         }
     }
 
@@ -588,7 +619,9 @@ class result {
         if (has_value()) {
             return result<T, ret_t>(*std::move(*this));
         } else {
-            return result<T, ret_t>(in_place_error, std::invoke(std::forward<F>(f), std::move(*this).error()));
+            return result<T, ret_t>(
+                in_place_error,
+                std::invoke(std::forward<F>(f), std::move(*this).error()));
         }
     }
 
@@ -598,7 +631,8 @@ class result {
     }
 
     template <typename U, typename... Args>
-    constexpr reference emplace(std::initializer_list<U> ilist, Args&&... args) {
+    constexpr reference emplace(std::initializer_list<U> ilist,
+                                Args&&... args) {
         return value_.template emplace<0>(ilist, std::forward<Args>(args)...);
     }
 
@@ -608,13 +642,12 @@ class result {
     }
 
     template <typename U, typename... Args>
-    constexpr error_reference emplace_error(std::initializer_list<U> ilist, Args&&... args) {
+    constexpr error_reference emplace_error(std::initializer_list<U> ilist,
+                                            Args&&... args) {
         return value_.template emplace<1>(ilist, std::forward<Args>(args)...);
     }
 
-    constexpr void swap(result& other) {
-        value_.swap(other);
-    }
+    constexpr void swap(result& other) { value_.swap(other); }
 
     constexpr result<reference, error_reference> as_ref() noexcept {
         if (has_value()) {
@@ -624,11 +657,13 @@ class result {
         }
     }
 
-    constexpr result<const_reference, error_const_reference> as_ref() const noexcept {
+    constexpr result<const_reference, error_const_reference> as_ref()
+        const noexcept {
         if (has_value()) {
             return result<const_reference, error_const_reference>(**this);
         } else {
-            return result<const_reference, error_const_reference>(in_place_error, error());
+            return result<const_reference, error_const_reference>(
+                in_place_error, error());
         }
     }
 };
@@ -639,7 +674,8 @@ constexpr void swap(result<T, E>& a, result<T, E>& b) {
 }
 
 template <typename T1, typename E1, typename T2, typename E2>
-constexpr bool operator==(const result<T1, E1>& lhs, const result<T2, E2>& rhs) {
+constexpr bool operator==(const result<T1, E1>& lhs,
+                          const result<T2, E2>& rhs) {
     if (lhs.has_value()) {
         return rhs.has_value() && *lhs == *rhs;
     } else {
@@ -667,7 +703,7 @@ constexpr bool operator==(const error<V>& lhs, const result<T, E>& rhs) {
     return !rhs.has_value() && *lhs == rhs.error();
 }
 
-}
+} // namespace jac
 
 template <typename E>
 struct std::hash<::jac::error<E>> {
@@ -683,8 +719,10 @@ struct std::hash<::jac::error<E>> {
 template <typename T, typename E>
 struct std::hash<::jac::result<T, E>> {
   private:
-    JAC_NO_UNIQ_ADDR std::hash<typename ::jac::result<T, E>::value_type> val_hasher_;
-    JAC_NO_UNIQ_ADDR std::hash<typename ::jac::result<T, E>::error_type> err_hasher_;
+    JAC_NO_UNIQ_ADDR std::hash<typename ::jac::result<T, E>::value_type>
+        val_hasher_;
+    JAC_NO_UNIQ_ADDR std::hash<typename ::jac::result<T, E>::error_type>
+        err_hasher_;
     JAC_NO_UNIQ_ADDR std::hash<bool> bool_hasher_;
 
   public:
@@ -692,7 +730,8 @@ struct std::hash<::jac::result<T, E>> {
         if (res.has_value()) {
             return ::jac::hash_combine(bool_hasher_(true), val_hasher_(*res));
         } else {
-            return ::jac::hash_combine(bool_hasher_(false), val_hasher_(res.error()));
+            return ::jac::hash_combine(bool_hasher_(false),
+                                       val_hasher_(res.error()));
         }
     }
 };

@@ -10,7 +10,7 @@
 /// and niche container data strcutures.
 ///
 /// ## Smart Pointers (Single Object Containers)
-///  Type | Brief  
+///  Type | Brief
 /// ------|-------
 ///  @ref jac::holder "holder<T, Tag=void>" | @copybrief jac::holder
 ///  @ref jac::option "option<T>" | @copybrief jac::option
@@ -22,7 +22,7 @@
 ///  @ref jac::null_t "null_t" | @copybrief jac::null_t
 ///  @ref jac::void_t "void_t" | @copybrief jac::void_t
 ///  @ref jac::error "error" | @copybrief jac::error
-/// 
+///
 /// ## Constants
 ///  Constant | Brief
 /// ----------|-------

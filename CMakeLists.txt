@@ -55,3 +55,22 @@ if(JAC_DOCS)
     set(DOXYGEN_HTML_COLORSTYLE LIGHT)
     doxygen_add_docs(docs "${PROJECT_SOURCE_DIR}/include/jac")
 endif()
+
+if(JAC_TOP_LEVEL)
+    find_program(CLANG_FORMAT clang-format)
+    file(GLOB_RECURSE FMT_FILES RELATIVE "${PROJECT_SOURCE_DIR}" include/*.hpp tests/*.cpp tests/*.hpp)
+    file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/fmt")
+    set(FMT_TAGS)
+    foreach(FMT_FILE ${FMT_FILES})
+        set(FMT_TAG "${PROJECT_BINARY_DIR}/fmt/${FMT_FILE}.tag")
+        get_filename_component(FMT_TAG_DIR "${FMT_TAG}" DIRECTORY)
+        list(APPEND FMT_TAGS "${FMT_TAG}")
+        add_custom_command(OUTPUT "${FMT_TAG}"
+            COMMAND "${CLANG_FORMAT}" -style=file -i "${PROJECT_SOURCE_DIR}/${FMT_FILE}"
+            COMMAND "${CMAKE_COMMAND}" -E make_directory "${FMT_TAG_DIR}"
+            COMMAND "${CMAKE_COMMAND}" -E touch "${FMT_TAG}"
+            COMMENT "Formatting ${FMT_FILE}"
+        )
+    endforeach()
+    add_custom_target(format DEPENDS ${FMT_TAGS})
+endif()
