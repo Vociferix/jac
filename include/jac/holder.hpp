@@ -26,6 +26,8 @@ class holder_impl {
     using pointer = T*;
     using const_pointer = std::add_const_t<T>*;
 
+    static constexpr bool is_array = false;
+
     constexpr holder_impl() = default;
 
     template <typename... Args>
@@ -80,6 +82,8 @@ class holder_impl<T&> {
     using pointer = T*;
     using const_pointer = T*;
 
+    static constexpr bool is_array = false;
+
     constexpr holder_impl() = default;
 
     template <typename U>
@@ -111,6 +115,8 @@ class holder_impl<T&&> : public holder_impl<T> {
     using const_pointer = typename holder_impl<T>::const_pointer;
 
     using holder_impl<T>::holder_impl;
+
+    static constexpr bool is_array = false;
 };
 
 template <>
@@ -125,6 +131,8 @@ class holder_impl<void> : public holder_impl<void_t> {
     using const_rvalue_reference = typename holder_impl<void_t>::const_rvalue_reference;
     using pointer = typename holder_impl<void_t>::pointer;
     using const_pointer = typename holder_impl<void_t>::const_pointer;
+
+    static constexpr bool is_array = false;
 };
 
 template <typename T, size_t N>
@@ -144,6 +152,8 @@ class holder_impl<T[N]> {
     using const_rvalue_reference = std::add_const_t<T>(&&)[N];
     using pointer = T(*)[N];
     using const_pointer = std::add_const_t<T>(*)[N];
+
+    static constexpr bool is_array = true;
 
     constexpr holder_impl() = default;
 
@@ -200,6 +210,8 @@ class holder_impl<T(&)[N]> {
     using const_rvalue_reference = value_type;
     using pointer = T(*)[N];
     using const_pointer = T(*)[N];
+
+    static constexpr bool is_array = false;
 
     constexpr holder_impl() = default;
 
@@ -307,6 +319,14 @@ class holder {
         )
     constexpr explicit(!std::is_convertible_v<U&&, value_type>) holder(U&& value)
         : value_(std::in_place, std::forward<U>(value)) {}
+
+    template <typename U = value_type>
+        requires(
+            detail::holder_impl<T>::is_array ||
+            std::is_constructible_v<value_type, std::initializer_list<U>>
+        )
+    constexpr holder(std::initializer_list<U> ilist)
+        : value_(std::in_place, ilist) {}
 
     constexpr ~holder() = default;
 
@@ -437,30 +457,22 @@ class holder {
     constexpr holder<const_reference, Tag> as_ref() const& noexcept {
         return holder<const_reference, Tag>(value_.get());
     }
+
+    template <typename U>
+    friend constexpr std::compare_three_way_result_t<typename holder<T, Tag>::value_type, typename holder<U, Tag>::value_type>
+    operator<=>(const holder<T, Tag>& lhs, const holder<U, Tag>& rhs) {
+        return *lhs <=> *rhs;
+    }
+
+    template <typename U>
+    friend constexpr bool operator==(const holder<T, Tag>& lhs, const holder<U, Tag>& rhs) {
+        return *lhs == *rhs;
+    }
+
+    friend constexpr void swap(holder<T, Tag>& a, holder<T, Tag>& b) {
+        a.swap(b);
+    }
 };
-
-template <typename T, typename U, typename Tag>
-constexpr std::compare_three_way_result_t<typename holder<T, Tag>::value_type, typename holder<U, Tag>::value_type>
-operator<=>(const holder<T, Tag>& lhs, const holder<U, Tag>& rhs) {
-    return *lhs <=> *rhs;
-}
-
-template <typename T, typename U, typename Tag>
-constexpr std::compare_three_way_result_t<typename holder<T, Tag>::value_type, U>
-operator<=>(const holder<T, Tag>& lhs, const U& rhs) {
-    return *lhs <=> rhs;
-}
-
-template <typename T, typename U, typename Tag>
-constexpr std::compare_three_way_result_t<T, typename holder<U, Tag>::value_type>
-operator<=>(const T& lhs, const holder<U, Tag>& rhs) {
-    return lhs <=> *rhs;
-}
-
-template <typename T, typename Tag>
-constexpr void swap(holder<T, Tag>& a, holder<T, Tag>& b) {
-    a.swap(b);
-}
 
 template <typename T>
 holder(T&&) -> holder<T>;

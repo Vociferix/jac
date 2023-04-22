@@ -4,7 +4,6 @@
 /// @file
 
 #include <optional>
-#include <variant>
 
 namespace jac {
 
@@ -30,17 +29,25 @@ struct void_t {
 
     constexpr void_t& operator=(void_t&&) = default;
 
-    constexpr operator std::monostate() const noexcept {
-        return std::monostate();
-    }
-
     template <typename T>
     constexpr explicit operator T() const {
         return T{};
     }
-
-    constexpr operator void() const { } // NOLINT
 };
+
+constexpr bool operator==([[maybe_unused]] void_t lhs, [[maybe_unused]] void_t rhs) noexcept {
+    return true;
+}
+
+template <typename T>
+constexpr bool operator==([[maybe_unused]] void_t lhs, [[maybe_unused]] const T& rhs) noexcept {
+    return false;
+}
+
+template <typename T>
+constexpr bool operator==([[maybe_unused]] const T& lhs, [[maybe_unused]] void_t rhs) noexcept {
+    return false;
+}
 
 /// @brief Monostate object representing an instance of `void`
 static inline constexpr void_t void_v{};

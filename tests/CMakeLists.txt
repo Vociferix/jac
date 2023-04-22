@@ -12,7 +12,7 @@ include(CTest)
 include(Catch)
 
 add_executable(tests
-    example.cpp
+    holder.cpp
 )
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain jac::jac)
 catch_discover_tests(tests)
