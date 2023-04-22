@@ -175,35 +175,6 @@ class holder_impl<T[N]> {
     }
 };
 
-template <typename T, size_t N>
-class holder_impl<T (&)[N]> {
-  private:
-    T (*value_)[N]{nullptr};
-
-  public:
-    using value_type = T (&)[N];
-    using reference = value_type;
-    using const_reference = value_type;
-    using rvalue_reference = value_type;
-    using const_rvalue_reference = value_type;
-    using pointer = T (*)[N];
-    using const_pointer = T (*)[N];
-
-    static constexpr bool is_array = false;
-
-    constexpr holder_impl() = default;
-
-    constexpr holder_impl([[maybe_unused]] std::in_place_t in_place,
-                          T (&value)[N]) noexcept
-        : value_(&value) {}
-
-    constexpr reference get() const noexcept { return *value_; }
-
-    constexpr pointer ptr() const noexcept { return value_; }
-
-    constexpr void swap(holder_impl& other) { std::swap(value_, other.value_); }
-};
-
 } // namespace detail
 
 /// @brief A copyable and movable type capable of holding any type
